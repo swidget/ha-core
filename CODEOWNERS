@@ -1125,6 +1125,7 @@ build.json @home-assistant/supervisor
 /homeassistant/components/supla/ @mwegrzynek
 /homeassistant/components/surepetcare/ @benleb @danielhiversen
 /tests/components/surepetcare/ @benleb @danielhiversen
+/homeassistant/components/swidget/ @swidget
 /homeassistant/components/swiss_hydrological_data/ @fabaff
 /homeassistant/components/swiss_public_transport/ @fabaff
 /homeassistant/components/switch/ @home-assistant/core

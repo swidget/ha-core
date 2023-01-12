@@ -1,0 +1,31 @@
+set_default_brightness:
+  name: Set Default Brightness
+  description: Set a default brightness without changing the light level
+  target:
+    entity:
+      integration: swidget
+      domain: light
+  fields:
+    brightness:
+      name: brightness
+      description: The default light level when turned on
+      selector:
+        number:
+          min: 0
+          max: 100
+
+set_timer_countdown:
+  name: Set a switch countdown timer
+  description: Set a switch countdown timer
+  target:
+    entity:
+      integration: swidget
+      domain: switch
+  fields:
+    seconds:
+      name: minutes
+      description: The time that the switch will be on for.
+      selector:
+        number:
+          min: 1
+          max: 1440

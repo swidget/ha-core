@@ -100,6 +100,13 @@ class SwidgetBinarySensor(CoordinatedSwidgetEntity, BinarySensorEntity):
         return f"{self.entity_description.name}"
 
     @property
-    def native_value(self) -> float | str | None:
-        """Return the sensors state."""
-        return async_emeter_from_device(self.device, self.entity_description)
+    def is_on(self) -> bool | None:
+        """Return the state of the sensor."""
+        if attr := self.entity_description.emeter_attr:
+            if (val := self.device.realtime_values.get(attr, None)) is None:
+                return None
+            if attr == "occupied":
+                if val is True:
+                    return True
+                return False
+        return None

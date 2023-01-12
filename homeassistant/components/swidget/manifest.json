@@ -6,7 +6,7 @@
   "issue_tracker": "https://github.com/swidget/ha-swidget",
   "dependencies": ["network"],
   "codeowners": ["@swidget"],
-  "requirements": ["python-swidget==0.0.17"],
+  "requirements": ["python-swidget==0.0.18"],
   "iot_class": "local_polling",
   "quality_scale": "platinum",
   "ssdp": [

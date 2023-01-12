@@ -20,7 +20,6 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
 
@@ -58,9 +57,6 @@ async def async_discover_devices(
     # broadcast_addresses = await network.async_get_ipv4_broadcast_addresses(hass)
     # tasks = [Discover.discover(target=str(address)) for address in broadcast_addresses]
     discovered_devices: dict[str, SwidgetDiscoveredDevice] = await discover_devices()
-    for mac, device in discovered_devices.items():
-        discovered_devices[dr.format_mac(mac)] = device
-
     return discovered_devices
 
 

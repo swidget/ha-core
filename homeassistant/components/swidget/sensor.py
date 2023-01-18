@@ -18,7 +18,7 @@ from homeassistant.const import (
     CONCENTRATION_PARTS_PER_MILLION,
     PERCENTAGE,
     POWER_WATT,
-    PRESSURE_HPA,
+    PRESSURE_PA,
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     TEMP_CELSIUS,
 )
@@ -80,7 +80,7 @@ SWIDGET_SENSORS: tuple[SwidgetSensorEntityDescription, ...] = (
     ),
     SwidgetSensorEntityDescription(
         key="Pressure",
-        native_unit_of_measurement=PRESSURE_HPA,
+        native_unit_of_measurement=PRESSURE_PA,
         device_class=SensorDeviceClass.PRESSURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Air Pressure",

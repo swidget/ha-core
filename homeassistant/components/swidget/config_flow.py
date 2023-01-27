@@ -209,6 +209,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="no_devices_found")
         options = [
             SelectOptionDict(value="x-secret-key", label="x-secret-key"),
+            SelectOptionDict(value="x-site-key", label="x-site-key"),
             SelectOptionDict(value="x-user-key", label="x-user-key"),
         ]
 

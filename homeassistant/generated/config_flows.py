@@ -421,6 +421,7 @@ FLOWS = {
         "subaru",
         "sun",
         "surepetcare",
+        "swidget",
         "switchbee",
         "switchbot",
         "switcher_kis",

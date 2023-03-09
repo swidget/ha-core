@@ -1,33 +1,40 @@
 """Config flow for Swidget integration."""
 from __future__ import annotations
 
+from datetime import timedelta
 import logging
 from typing import Any
 
-from swidget.discovery import SwidgetDiscoveredDevice
+from swidget.discovery import SwidgetDiscoveredDevice, discover_devices
 from swidget.exceptions import SwidgetException
 from swidget.swidgetdevice import SwidgetDevice
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_DEVICE, CONF_HOST, CONF_MAC
+from homeassistant.const import (
+    CONF_DEVICE,
+    CONF_HOST,
+    CONF_MAC,
+    EVENT_HOMEASSISTANT_STARTED,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.selector import (
     SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
     SelectSelectorMode,
 )
-from homeassistant.helpers.typing import DiscoveryInfoType
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-from . import async_discover_devices
+from . import async_trigger_discovery
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-
+DISCOVERY_INTERVAL = timedelta(minutes=15)
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_HOST, default=""): str,
@@ -36,19 +43,12 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 )
 
 
-class PlaceholderHub:
-    """Placeholder class to make tests pass.
-
-    TODO Remove this placeholder class and replace with things from your PyPI package.
-    """
-
-    def __init__(self, host: str) -> None:
-        """Initialize."""
-        self.host = host
-
-    async def authenticate(self, password: str) -> bool:
-        """Test if we can authenticate with the host."""
-        return True
+async def async_discover_devices(
+    hass: HomeAssistant,
+) -> dict[str, SwidgetDiscoveredDevice]:
+    """Force discover Swidget devices using."""
+    discovered_devices: dict[str, SwidgetDiscoveredDevice] = await discover_devices()
+    return discovered_devices
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
@@ -65,6 +65,22 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         return {"title": f"{device.friendly_name}"}
     except SwidgetException as exc:
         raise CannotConnect from exc
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Set up the Swidget component."""
+    hass.data[DOMAIN] = {}
+
+    if discovered_devices := await async_discover_devices(hass):
+        async_trigger_discovery(hass, discovered_devices)
+
+    async def _async_discovery(*_: Any) -> None:
+        if discovered := await async_discover_devices(hass):
+            async_trigger_discovery(hass, discovered)
+
+    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _async_discovery)
+    async_track_time_interval(hass, _async_discovery, DISCOVERY_INTERVAL)
+    return True
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -164,6 +180,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             entry.unique_id for entry in self._async_current_entries()
         }
         self._discovered_devices = await async_discover_devices(self.hass)
+
         devices_name = {
             mac: f"{device.friendly_name} ({device.host})"
             for mac, device in self._discovered_devices.items()

@@ -1,24 +1,33 @@
 """The Swidget integration."""
 from __future__ import annotations
 
+from datetime import timedelta
 import logging
 from typing import Any
 
-from swidget.discovery import SwidgetDiscoveredDevice, discover_single
+from swidget.discovery import SwidgetDiscoveredDevice, discover_devices, discover_single
 from swidget.exceptions import SwidgetException
 from swidget.swidgetdevice import SwidgetDevice
 from swidget.websocket import SwidgetWebsocket
 
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, CONF_MAC, CONF_NAME
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_MAC,
+    CONF_NAME,
+    EVENT_HOMEASSISTANT_STARTED,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.typing import ConfigType
 
 from .const import DOMAIN, PLATFORMS
 from .coordinator import SwidgetDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
+DISCOVERY_INTERVAL = timedelta(minutes=15)
 
 
 @callback
@@ -41,9 +50,36 @@ def async_trigger_discovery(
         )
 
 
+async def async_discover_devices(
+    hass: HomeAssistant,
+) -> dict[str, SwidgetDiscoveredDevice]:
+    """Force discover Swidget devices using."""
+    # broadcast_addresses = await network.async_get_ipv4_broadcast_addresses(hass)
+    # tasks = [Discover.discover(target=str(address)) for address in broadcast_addresses]
+    discovered_devices: dict[str, SwidgetDiscoveredDevice] = await discover_devices()
+    return discovered_devices
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Set up the Swidget component."""
+    hass.data[DOMAIN] = {}
+
+    if discovered_devices := await async_discover_devices(hass):
+        async_trigger_discovery(hass, discovered_devices)
+
+    async def _async_discovery(*_: Any) -> None:
+        if discovered := await async_discover_devices(hass):
+            async_trigger_discovery(hass, discovered)
+
+    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _async_discovery)
+    async_track_time_interval(hass, _async_discovery, DISCOVERY_INTERVAL)
+    return True
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Swidget from a config entry."""
     try:
+        _LOGGER.error("Setup Data: %s", entry.data)
         device: SwidgetDevice = await discover_single(
             entry.data["host"],
             entry.data["token_name"],

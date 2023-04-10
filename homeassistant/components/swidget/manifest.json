@@ -8,7 +8,7 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/swidget/ha-swidget",
   "quality_scale": "platinum",
-  "requirements": ["python-swidget==0.0.29"],
+  "requirements": ["python-swidget==0.0.30"],
   "ssdp": [
     {
       "st": "urn:swidget:pico:1",

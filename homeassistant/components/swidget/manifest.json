@@ -1,0 +1,18 @@
+{
+  "domain": "swidget",
+  "name": "Swidget",
+  "codeowners": ["@swidget"],
+  "config_flow": true,
+  "dependencies": ["network"],
+  "documentation": "https://github.com/swidget/ha-swidget",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/swidget/ha-swidget",
+  "quality_scale": "platinum",
+  "requirements": ["python-swidget==0.0.30"],
+  "ssdp": [
+    {
+      "st": "urn:swidget:pico:1",
+      "manufacturer": "Swidget"
+    }
+  ]
+}

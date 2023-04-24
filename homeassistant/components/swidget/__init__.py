@@ -91,6 +91,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         raise ConfigEntryNotReady from ex
 
     hass.data[DOMAIN][entry.entry_id] = SwidgetDataUpdateCoordinator(hass, device)
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     ws_connection: SwidgetWebsocket = device.get_websocket()
     hass.loop.create_task(ws_connection.listen())
     return True

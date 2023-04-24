@@ -54,8 +54,6 @@ async def async_discover_devices(
     hass: HomeAssistant,
 ) -> dict[str, SwidgetDiscoveredDevice]:
     """Force discover Swidget devices using."""
-    # broadcast_addresses = await network.async_get_ipv4_broadcast_addresses(hass)
-    # tasks = [Discover.discover(target=str(address)) for address in broadcast_addresses]
     discovered_devices: dict[str, SwidgetDiscoveredDevice] = await discover_devices()
     return discovered_devices
 
@@ -79,7 +77,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Swidget from a config entry."""
     try:
-        _LOGGER.error("Setup Data: %s", entry.data)
         device: SwidgetDevice = await discover_single(
             entry.data["host"],
             entry.data["token_name"],
